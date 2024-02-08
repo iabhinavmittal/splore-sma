@@ -9,16 +9,18 @@ import {
   peakHoursConfig,
   weeklyFareCapConfig,
 } from "./constant.js";
-import { getWeek } from "./helper.js";
+import { getWeek, isGreaterThan } from "./helper.js";
 
 // returns if the time of day is peak hour or not
 const isPeakHourFunc = (dateObj) => {
   const dayOfWeek = dateObj.getDay();
-  const time = dateObj.getHours() + ":" + dateObj.getMinutes();
+  const hour = ("0" + dateObj.getHours()).slice(-2);
+  const min = ("0" + dateObj.getMinutes()).slice(-2);
+  const time = hour + ":" + min;
 
   const peakHoursOfDay = peakHoursConfig[dayOfWeek];
   for (const p of peakHoursOfDay) {
-    if (time > p.from && time < p.to) return true;
+    if (isGreaterThan(time, p.from) && isGreaterThan(p.to, time)) return true;
   }
 
   return false;
@@ -41,7 +43,8 @@ const readInputFromCSV = (filePath) => {
 };
 
 const calculateFarePerRoutes = (trips) => {
-  const routesFareAmount = {};
+  const dailyFarePerRoute = {};
+  const weeklyFarePerRoute = {};
 
   for (const t of trips) {
     const tDate = t.dateObj.getDate();
@@ -60,33 +63,37 @@ const calculateFarePerRoutes = (trips) => {
       routeKey,
       0
     );
+    let amountToBeDebited = currFare;
 
     // daily fare
     const dailyFareCap = _get(dailyFareCapConfig, routeKey, Infinity);
-    const prevDailyFare = _get(routesFareAmount, dailyHashKey, 0);
-    const newDailyFare = Math.min(dailyFareCap, prevDailyFare + currFare);
-    _set(routesFareAmount, dailyHashKey, newDailyFare);
+    const prevDailyFare = _get(dailyFarePerRoute, dailyHashKey, 0);
+    amountToBeDebited = Math.min(
+      dailyFareCap - prevDailyFare,
+      amountToBeDebited
+    );
+
+    // const newDailyFare = Math.min(dailyFareCap, prevDailyFare + currFare);
 
     // weekly fare
     const weeklyFareCap = _get(weeklyFareCapConfig, routeKey, Infinity);
-    const prevWeeklyFare = _get(routesFareAmount, weeklyHashKey, 0);
-    const newWeeklyFare = Math.min(weeklyFareCap, prevWeeklyFare + currFare);
-    _set(routesFareAmount, weeklyHashKey, newWeeklyFare);
+    const prevWeeklyFare = _get(weeklyFarePerRoute, weeklyHashKey, 0);
+    amountToBeDebited = Math.min(
+      weeklyFareCap - prevWeeklyFare,
+      amountToBeDebited
+    );
+    // const newWeeklyFare = Math.min(weeklyFareCap, prevWeeklyFare + currFare);
 
-    // console.log(
-    //   "fare calc:",
-    //   dailyFareCap,
-    //   prevDailyFare,
-    //   currFare,
-    //   newDailyFare,
-    //   newWeeklyFare
-    // );
+    _set(dailyFarePerRoute, dailyHashKey, prevDailyFare + amountToBeDebited);
+    _set(weeklyFarePerRoute, weeklyHashKey, prevWeeklyFare + amountToBeDebited);
   }
 
-  return routesFareAmount;
+  return dailyFarePerRoute;
 };
 
-const calculateTotalFare = (routesFareAmount) => {
+export const calculateTotalFare = (trips) => {
+  const routesFareAmount = calculateFarePerRoutes(trips);
+
   let totalFare = Object.values(routesFareAmount).reduce((prev, curr, _) => {
     return prev + curr;
   });
@@ -96,9 +103,8 @@ const calculateTotalFare = (routesFareAmount) => {
 
 const main = () => {
   const trips = readInputFromCSV("./input.csv");
-  const routesFareAmount = calculateFarePerRoutes(trips);
-  console.log(JSON.stringify(routesFareAmount));
-  const totalFare = calculateTotalFare(routesFareAmount);
+
+  const totalFare = calculateTotalFare(trips);
   console.log("Total Fare: ", totalFare);
 };
 

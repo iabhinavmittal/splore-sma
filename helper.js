@@ -1,3 +1,14 @@
+export const isGreaterThan = (time1, time2) => {
+  let date1 = new Date(`1970-01-01T${time1}:00Z`);
+  let date2 = new Date(`1970-01-01T${time2}:00Z`);
+
+  if (date1 >= date2) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
 export const getWeek = (date, dowOffset) => {
   dowOffset = typeof dowOffset == "number" ? dowOffset : 0; //default dowOffset to zero
   var newYear = new Date(date.getFullYear(), 0, 1);
