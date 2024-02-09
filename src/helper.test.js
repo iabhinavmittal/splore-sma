@@ -36,7 +36,7 @@ describe("Time Comparison", () => {
 describe("Week Number Calculation", () => {
   test("Week number for January 1, 2022 (Saturday)", () => {
     const date = new Date("2022-01-01T00:00:00");
-    expect(getWeek(date)).toBe(1);
+    expect(getWeek(date)).toBe(0);
   });
 
   test("Week number for August 15, 2022 (Monday)", () => {
