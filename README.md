@@ -11,6 +11,6 @@
 1. Go to root folder
 2. run `npm test`. It will run all the jest tests available in the project
 
-## Improvements:
+## Future Improvements:
 
-1. Use shorthand names for lines (gree, red) so that it uses less space in the memory when hasing them
+1. Use shorthand names for lines (green, red) so that it uses less space in the memory when hasing them

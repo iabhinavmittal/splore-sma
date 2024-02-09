@@ -14,7 +14,7 @@ import { getWeek, isGreaterThan } from "./helper.js";
 // returns if the time of day is peak hour or not
 const isPeakHourFunc = (dateObj) => {
   const dayOfWeek = dateObj.getDay();
-  const hour = ("0" + dateObj.getHours()).slice(-2);
+  const hour = ("0" + dateObj.getHours()).slice(-2); // adding 0 to maintain '08' format
   const min = ("0" + dateObj.getMinutes()).slice(-2);
   const time = hour + ":" + min;
 
@@ -73,8 +73,6 @@ const calculateFarePerRoutes = (trips) => {
       amountToBeDebited
     );
 
-    // const newDailyFare = Math.min(dailyFareCap, prevDailyFare + currFare);
-
     // weekly fare
     const weeklyFareCap = _get(weeklyFareCapConfig, routeKey, Infinity);
     const prevWeeklyFare = _get(weeklyFarePerRoute, weeklyHashKey, 0);
@@ -82,7 +80,6 @@ const calculateFarePerRoutes = (trips) => {
       weeklyFareCap - prevWeeklyFare,
       amountToBeDebited
     );
-    // const newWeeklyFare = Math.min(weeklyFareCap, prevWeeklyFare + currFare);
 
     _set(dailyFarePerRoute, dailyHashKey, prevDailyFare + amountToBeDebited);
     _set(weeklyFarePerRoute, weeklyHashKey, prevWeeklyFare + amountToBeDebited);
